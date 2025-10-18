@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Processor Interface - Legacy Style</title>
+    
+    <style>
+        :root {
+            --primary-dark: #1c2e4a;
+            --primary-accent: #e30b13;
+            --status-black: #1a1a1a;
+            --bg-color: #f0f0f5;
+            --card-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .container {
+            background-color: white;
+            padding: 32px;
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            width: 100%;
+            max-width: 512px;
+            border-top: 8px solid var(--primary-accent);
+            transition: box-shadow 0.5s;
+        }
+        
+        .container:hover {
+            box-shadow: 0 0 20px rgba(28, 46, 74, 0.3);
+        }
+
+        h1 {
+            font-size: 2.25rem;
+            font-weight: 900;
+            text-align: center;
+            color: var(--status-black);
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #6b7280;
+            margin-bottom: 24px;
+            font-weight: 300;
+        }
+
+        .input-fields {
+            margin-bottom: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+        
+        .input-group {
+            position: relative;
+            border: none;
+            border-radius: 0;
+            padding: 0 0 8px 0;
+            transition: all 0.3s;
+        }
+        
+        .input-group input {
+            width: 100%;
+            font-size: 1.125rem;
+            padding-top: 4px;
+            padding-bottom: 4px;
+            padding-left: 0;
+            padding-right: 0;
+            border: none; 
+            border-bottom: 2px solid #d1d5db;
+            outline: none;
+            transition: border-bottom-color 0.3s;
+        }
+        
+        .input-group input:focus {
+            border-bottom-color: var(--primary-accent);
+        }
+        
+        .input-group label {
+            position: absolute;
+            left: 0;
+            top: 12px;
+            color: #9ca3af;
+            pointer-events: none;
+            transition: all 0.2s ease-in-out;
+            transform-origin: top left;
+            font-size: 1.125rem;
+            transform: translateY(0) scale(1);
+        }
+
+        .input-group input:focus + label,
+        .input-group input:not(:placeholder-shown) + label {
+            transform: translateY(-24px) scale(0.85);
+            color: var(--primary-accent);
+            font-size: 0.85rem;
+        }
+        
+        .radio-group {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            padding: 16px 0;
+            border-top: 1px solid #e5e7eb;
+            border-bottom: 1px solid #e5e7eb;
+            margin-bottom: 24px;
+        }
+        
+        .radio-option {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            font-size: 1rem;
+            color: var(--status-black);
+            font-weight: 500;
+        }
+        
+        .radio-option input[type="radio"] {
+            margin-right: 8px;
+            accent-color: var(--primary-accent);
+            transform: scale(1.2);
+        }
+
+        #calculateBtn {
+            width: 100%;
+            background-color: var(--primary-accent);
+            color: white;
+            font-weight: 800;
+            padding: 12px 0;
+            border-radius: 12px;
+            transition: background-color 0.3s, transform 0.1s, box-shadow 0.3s;
+            box-shadow: 0 10px 15px -3px rgba(227, 11, 19, 0.5);
+            cursor: pointer;
+            border: none;
+        }
+        
+        #calculateBtn:hover {
+            background-color: var(--primary-dark);
+            box-shadow: 0 10px 15px -3px rgba(28, 46, 74, 0.5);
+        }
+        
+        #calculateBtn:active {
+            transform: scale(0.98);
+        }
+        
+        #calculateBtn:disabled {
+            background-color: #9ca3af;
+            box-shadow: none;
+        }
+        
+        #statusMessage {
+            text-align: center;
+            color: var(--primary-dark);
+            margin-top: 16px;
+            font-weight: 600;
+        }
+
+        #errorMessage {
+            text-align: center;
+            color: var(--primary-accent);
+            margin-top: 16px;
+            font-weight: 600;
+            background-color: #fee2e2;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid rgba(227, 11, 19, 0.5);
+        }
+        
+        #result-container {
+            margin-top: 32px;
+            background-color: var(--primary-dark);
+            padding: 24px;
+            border-radius: 12px;
+            color: white;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6);
+            transform: translateY(8px);
+            opacity: 0;
+            transition: all 0.5s ease-out;
+        }
+
+        #result-container h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+            padding-bottom: 8px;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+        }
+        
+        .result-row span:first-child {
+            font-weight: 300;
+            font-size: 1.125rem;
+        }
+
+        #interestOutput {
+            font-size: 1.875rem;
+            font-weight: 900;
+            color: #fca5a5;
+        }
+        
+        #totalOutput {
+            font-size: 2.25rem;
+            font-weight: 900;
+            color: #a7f3d0;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div class="container" id="main-container">
+        
+        <h1>
+            ADVANCED INTEREST COMPUTATION MODULE
+        </h1>
+        <p class="subtitle">
+            Enter all financial vectors and initiate processing cycle.
+        </p>
+        
+        <div class="radio-group">
+            <label class="radio-option">
+                <input type="radio" name="interestType" value="simple" id="simpleInterest" checked>
+                Simple Interest
+            </label>
+            <label class="radio-option">
+                <input type="radio" name="interestType" value="compound" id="compoundInterest">
+                Compound Interest
+            </label>
+        </div>
+
+        <div id="input-fields" class="input-fields">
+            
+            <div class="input-group">
+                <input type="number" id="principal" value="1000" min="0.01" step="any" placeholder=" ">
+                <label for="principal">Principal Amount (P)</label>
+            </div>
+
+            <div class="input-group">
+                <input type="number" id="rate" value="5" min="0.01" step="any" placeholder=" ">
+                <label for="rate">Annual Rate (R in %)</label>
+            </div>
+
+            <div class="input-group">
+                <input type="number" id="time" value="3" min="0.01" step="any" placeholder=" ">
+                <label for="time">Time in Years (T)</label>
+            </div>
+            
+            <div class="input-group hidden" id="compoundingFrequencyGroup">
+                <input type="number" id="compoundingFrequency" value="12" min="1" step="1" placeholder=" ">
+                <label for="compoundingFrequency">Compounding Frequency (n) - e.g. 12 for Monthly</label>
+            </div>
+            
+        </div>
+        
+        <button id="calculateBtn">
+            INITIATE COMPLEX CALCULATION
+        </button>
+
+        <p id="statusMessage" class="hidden">
+            SYSTEM STATUS: Processing data packet... Await response...
+        </p>
+
+        <div id="result-container" class="hidden" data-visible="false">
+            <h2>FINAL REPORT: COMPUTATION COMPLETE</h2>
+            <div class="result-row">
+                <span>Interest Vector (I):</span>
+                <span id="interestOutput"></span>
+            </div>
+            <div class="result-row">
+                <span style="font-weight: bold; font-size: 1.25rem;">Total Final Asset Value (A):</span>
+                <span id="totalOutput"></span>
+            </div>
+        </div>
+        
+        <p id="errorMessage" class="hidden">
+            ERROR 403: Invalid or non-positive input values detected. Correct and re-transmit.
+        </p>
+    </div>
+
+    <script>
+        
+        const calculateSimpleInterest = (principal, rate, time) => {
+            const decimalRate = rate / 100.0;
+            const finalInterestAmount = principal * decimalRate * time;
+            const finalTotalBalance = principal + finalInterestAmount;
+
+            return { 
+                interest: finalInterestAmount.toFixed(2), 
+                totalAmount: finalTotalBalance.toFixed(2) 
+            };
+        };
+
+        const calculateCompoundInterest = (principal, rate, time, frequency) => {
+            const decimalRate = rate / 100.0;
+            
+            const n = frequency > 0 ? frequency : 1; 
+
+            const finalTotalBalance = principal * Math.pow((1 + decimalRate / n), (n * time));
+            const finalInterestAmount = finalTotalBalance - principal;
+            
+            return {
+                interest: finalInterestAmount.toFixed(2),
+                totalAmount: finalTotalBalance.toFixed(2)
+            };
+        };
+
+
+        class FinancialProcessor {
+            constructor(principal, rate, time, type, frequency) {
+                this.principal = parseFloat(principal);
+                this.rate = parseFloat(rate);
+                this.time = parseFloat(time);
+                this.type = type;
+                this.frequency = parseFloat(frequency);
+            }
+
+            isInputValid() {
+                let isValid = (
+                    this.principal > 0 && 
+                    this.rate > 0 && 
+                    this.time > 0 &&
+                    !isNaN(this.principal) &&
+                    !isNaN(this.rate) &&
+                    !isNaN(this.time)
+                );
+                
+                if (this.type === 'compound') {
+                    isValid = isValid && this.frequency >= 1 && !isNaN(this.frequency);
+                }
+                
+                return isValid;
+            }
+
+            getResults() {
+                if (!this.isInputValid()) {
+                    return null;
+                }
+                
+                if (this.type === 'simple') {
+                    return calculateSimpleInterest(this.principal, this.rate, this.time);
+                } else if (this.type === 'compound') {
+                    return calculateCompoundInterest(this.principal, this.rate, this.time, this.frequency);
+                }
+                
+                return null;
+            }
+        }
+
+        const ELEMENTS = {
+            principal: document.getElementById('principal'),
+            rate: document.getElementById('rate'),
+            time: document.getElementById('time'),
+            compoundingFrequency: document.getElementById('compoundingFrequency'),
+            compoundingFrequencyGroup: document.getElementById('compoundingFrequencyGroup'),
+            simpleInterestRadio: document.getElementById('simpleInterest'),
+            compoundInterestRadio: document.getElementById('compoundInterest'),
+            calculateBtn: document.getElementById('calculateBtn'),
+            resultContainer: document.getElementById('result-container'),
+            interestOutput: document.getElementById('interestOutput'),
+            totalOutput: document.getElementById('totalOutput'),
+            errorMessage: document.getElementById('errorMessage'),
+            statusMessage: document.getElementById('statusMessage')
+        };
+        
+        const toggleCompoundingFrequencyField = () => {
+            if (ELEMENTS.compoundInterestRadio.checked) {
+                ELEMENTS.compoundingFrequencyGroup.classList.remove('hidden');
+            } else {
+                ELEMENTS.compoundingFrequencyGroup.classList.add('hidden');
+            }
+        };
+
+        ELEMENTS.simpleInterestRadio.addEventListener('change', toggleCompoundingFrequencyField);
+        ELEMENTS.compoundInterestRadio.addEventListener('change', toggleCompoundingFrequencyField);
+        
+        toggleCompoundingFrequencyField();
+
+
+        const executeCalculationSequence = async () => {
+            ELEMENTS.resultContainer.classList.add('hidden');
+            ELEMENTS.resultContainer.style.opacity = '0';
+            ELEMENTS.resultContainer.style.transform = 'translateY(8px)';
+            ELEMENTS.errorMessage.classList.add('hidden');
+            ELEMENTS.statusMessage.classList.remove('hidden');
+            ELEMENTS.calculateBtn.disabled = true;
+
+            const P = ELEMENTS.principal.value;
+            const R = ELEMENTS.rate.value;
+            const T = ELEMENTS.time.value;
+            const interestType = ELEMENTS.compoundInterestRadio.checked ? 'compound' : 'simple';
+            const N = ELEMENTS.compoundingFrequency.value;
+
+            const processorInstance = new FinancialProcessor(P, R, T, interestType, N);
+
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            const results = processorInstance.getResults(); 
+
+            ELEMENTS.statusMessage.classList.add('hidden');
+            ELEMENTS.calculateBtn.disabled = false;
+
+            if (results) {
+                ELEMENTS.interestOutput.textContent = `$${results.interest}`;
+                ELEMENTS.totalOutput.textContent = `$${results.totalAmount}`;
+                
+                ELEMENTS.resultContainer.classList.remove('hidden');
+                setTimeout(() => {
+                    ELEMENTS.resultContainer.style.opacity = '1';
+                    ELEMENTS.resultContainer.style.transform = 'translateY(0)';
+                }, 10);
+            } else {
+                ELEMENTS.errorMessage.classList.remove('hidden');
+            }
+        };
+
+        ELEMENTS.calculateBtn.addEventListener('click', executeCalculationSequence);
+    </script>
+</body>
+</html>
